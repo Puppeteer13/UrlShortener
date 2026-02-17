@@ -1,0 +1,12 @@
+﻿@page "/urlshortener"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using UrlShortener.Shared
+
+<PageTitle>UrlShortener</PageTitle>
+
+<QuickGrid Items="ShortUrls" TGridItem="ShortenedUrlModel">
+	<PropertyColumn Property="@(x => x.ShortCode)" />
+	<PropertyColumn Property="@(x => x.FullUrl)" />
+	<PropertyColumn Property="@(x => x.RedirectCount)" />
+</QuickGrid>
+<Paginator />

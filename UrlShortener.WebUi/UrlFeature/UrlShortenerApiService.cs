@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using UrlShortener.Shared;
 
-namespace UrlShortener.WebUi.UrlShortener;
+namespace UrlShortener.WebUi.UrlFeature;
 
 public class UrlShortenerApiService {
     private static readonly HttpClient _httpClient;
