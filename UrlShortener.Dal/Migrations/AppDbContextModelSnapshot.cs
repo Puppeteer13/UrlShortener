@@ -21,7 +21,7 @@ namespace UrlShortener.Dal.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("UrlShortener.Dal.Entities.ShrotenedUrl", b =>
+            modelBuilder.Entity("UrlShortener.Dal.Entities.ShortenedUrl", b =>
                 {
                     b.Property<string>("ShortCode")
                         .HasMaxLength(10)

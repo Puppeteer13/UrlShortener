@@ -1,6 +1,6 @@
 ﻿namespace UrlShortener.Dal.Entities;
 
-public class ShrotenedUrl {
+public class ShortenedUrl {
     public string ShortCode { get; set; } = "";
     public string FullUrl { get; set; } = "";
     public long CreatedAt { get; set; }

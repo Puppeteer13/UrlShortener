@@ -4,8 +4,8 @@ using UrlShortener.Dal.Entities;
 
 namespace UrlShortener.Dal.Config;
 
-public class ShortenedUrlConfig : IEntityTypeConfiguration<ShrotenedUrl> {
-    public void Configure(EntityTypeBuilder<ShrotenedUrl> builder) {
+public class ShortenedUrlConfig : IEntityTypeConfiguration<ShortenedUrl> {
+    public void Configure(EntityTypeBuilder<ShortenedUrl> builder) {
         builder.HasKey(x => x.ShortCode);
 
         builder.Property(x => x.ShortCode).HasMaxLength(10);

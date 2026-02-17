@@ -4,9 +4,26 @@
 
 <PageTitle>UrlShortener</PageTitle>
 
-<QuickGrid Items="ShortUrls" TGridItem="ShortenedUrlModel">
-	<PropertyColumn Property="@(x => x.ShortCode)" />
-	<PropertyColumn Property="@(x => x.FullUrl)" />
-	<PropertyColumn Property="@(x => x.RedirectCount)" />
+<div class="mb-3 d-flex gap-2">
+    <input type="text"
+           class="form-control"
+           placeholder="Enter URL to shorten (e.g. https://google.com)"
+           @bind="UrlInput"
+           @bind:event="oninput" />
+    
+    <button class="btn btn-primary" @onclick="AddUrlAsync">
+        Shorten
+    </button>
+</div>
+
+<QuickGrid ItemsProvider="ItemsProvider" Pagination="Pagination" TGridItem="ShortUrlTableModel">
+    <TemplateColumn Title="Short Code">
+    <a href="@($"{AppSettings.ApiBaseUrl}url/{context.ShortCode}")" target="_blank">@context.ShortCode</a>
+    </TemplateColumn>
+    <TemplateColumn Title="Full Url">
+        <a href="@context.FullUrl" target="_blank">@context.FullUrl</a>
+    </TemplateColumn>
+	<PropertyColumn Property="@(x => x.RedirectCount)" Title="Clicks" />
+    <PropertyColumn Property="@(x => x.CreatedAt)" Title="Created At" />
 </QuickGrid>
-<Paginator />
+<Paginator State="Pagination" />

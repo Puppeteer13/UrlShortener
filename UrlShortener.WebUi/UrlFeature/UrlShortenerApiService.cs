@@ -4,21 +4,23 @@ using UrlShortener.Shared;
 namespace UrlShortener.WebUi.UrlFeature;
 
 public class UrlShortenerApiService {
-    private static readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    static UrlShortenerApiService() {
-        _httpClient = new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) });
+    public UrlShortenerApiService(IHttpClientFactory factory) {
+        _httpClientFactory = factory;
     }
 
-    public static async Task<List<ShortenedUrlModel>?> GetUrlListAsync(int pageNum, int pageSize) {
-        var response = await _httpClient.GetAsync($"Url/List?pageNum={pageNum}&pageSize={pageSize}");
+    public async Task<ShortenedUrlResponsePage?> GetUrlListAsync(int pageNum, int pageSize) {
+        var client = _httpClientFactory.CreateClient("Api");
+        var response = await client.GetAsync($"Url/List?pageNum={pageNum}&pageSize={pageSize}");
 
-        return await response.Content.ReadFromJsonAsync<List<ShortenedUrlModel>>();
+        return await response.Content.ReadFromJsonAsync<ShortenedUrlResponsePage>();
     }
 
-    public static async Task<ShortenedUrlModel?> ShortenUrlAsync(string url) {
-        var encodedUrl = Uri.EscapeDataString(url);
-        var response = await _httpClient.GetAsync($"Url/Shorten?url={encodedUrl}");
+    public async Task<ShortenedUrlModel?> ShortenUrlAsync(string url) {
+        var client = _httpClientFactory.CreateClient("Api");
+        var request = new ShortenUrlRequestModel { FullUrl = url };
+        var response = await client.PostAsJsonAsync($"Url/Shorten", request);
 
         if (!response.IsSuccessStatusCode) {
             var errorContent = await response.Content.ReadAsStringAsync();

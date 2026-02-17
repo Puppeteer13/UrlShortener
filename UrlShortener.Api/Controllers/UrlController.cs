@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.Dal;
 using UrlShortener.Dal.Entities;
+using UrlShortener.Shared;
 
 namespace UrlShortener.Api.Controllers;
 
@@ -16,12 +17,12 @@ public class UrlController : ControllerBase {
         _dbContext = dbContext;
     }
 
-    [HttpGet("Shorten")]
-    public async Task<IActionResult> ShortenUrl([FromQuery]string url) {
-        if (string.IsNullOrWhiteSpace(url))
+    [HttpPost("Shorten")]
+    public async Task<IActionResult> ShortenUrl(ShortenUrlRequestModel request) {
+        if (string.IsNullOrWhiteSpace(request.FullUrl))
             return BadRequest("URL is required.");
 
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uriResult) ||
+        if (!Uri.TryCreate(request.FullUrl, UriKind.Absolute, out var uriResult) ||
             (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)) {
             return BadRequest("Invalid URL format. Only HTTP/HTTPS are allowed.");
         }
@@ -35,10 +36,10 @@ public class UrlController : ControllerBase {
             code = new string(codeChars);
         } while (await _dbContext.ShortenedUrls.AnyAsync(x => x.ShortCode == code));
 
-        var shortenedUrl = new ShrotenedUrl {
+        var shortenedUrl = new ShortenedUrl {
             ShortCode = code,
             CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            FullUrl = url
+            FullUrl = request.FullUrl
         };
 
         _dbContext.Add(shortenedUrl);
@@ -68,7 +69,17 @@ public class UrlController : ControllerBase {
 
     [HttpGet("List")]
     public async Task<IActionResult> ListShortUrls([FromQuery] int pageNum, [FromQuery] int pageSize) {
-        var list = await _dbContext.ShortenedUrls.AsNoTracking().Skip(pageNum * pageSize).Take(pageSize).ToListAsync();
-        return Ok(list);
+        var list = await _dbContext.ShortenedUrls.AsNoTracking().OrderByDescending(x => x.CreatedAt).Skip((pageNum - 1) * pageSize).Take(pageSize).ToListAsync();
+        var count = await _dbContext.ShortenedUrls.CountAsync();
+        var result = new ShortenedUrlResponsePage {
+            Items = list.Select(x => new ShortenedUrlModel {
+                ShortCode = x.ShortCode,
+                CreatedAt = x.CreatedAt,
+                FullUrl = x.FullUrl,
+                RedirectCount = x.RedirectCount
+            }).ToList(),
+            OverallCount = count
+        };
+        return Ok(result);
     }
 }

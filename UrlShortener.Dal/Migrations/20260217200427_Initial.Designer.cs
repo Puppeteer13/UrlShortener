@@ -11,7 +11,7 @@ using UrlShortener.Dal;
 namespace UrlShortener.Dal.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260216205159_Initial")]
+    [Migration("20260217200427_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace UrlShortener.Dal.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("UrlShortener.Dal.Entities.ShrotenedUrl", b =>
+            modelBuilder.Entity("UrlShortener.Dal.Entities.ShortenedUrl", b =>
                 {
                     b.Property<string>("ShortCode")
                         .HasMaxLength(10)
