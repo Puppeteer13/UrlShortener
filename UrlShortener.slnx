@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Project Path="UrlShortener.Api/UrlShortener.Api.csproj" />
+  <Project Path="UrlShortener.Dal/UrlShortener.Dal.csproj" />
+  <Project Path="UrlShortener.Shared/UrlShortener.Shared.csproj" />
+  <Project Path="UrlShortener.WebUi/UrlShortener.WebUi.csproj" />
+</Solution>
