@@ -16,7 +16,7 @@ public class UrlController : ControllerBase {
         _dbContext = dbContext;
     }
 
-    [HttpPost("Shorten")]
+    [HttpGet("Shorten")]
     public async Task<IActionResult> ShortenUrl([FromQuery]string url) {
         if (string.IsNullOrWhiteSpace(url))
             return BadRequest("URL is required.");
@@ -64,5 +64,11 @@ public class UrlController : ControllerBase {
             .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.RedirectCount, x => x.RedirectCount + 1));
 
         return Redirect(fullUrl);
+    }
+
+    [HttpGet("List")]
+    public async Task<IActionResult> ListShortUrls([FromQuery] int pageNum, [FromQuery] int pageSize) {
+        var list = await _dbContext.ShortenedUrls.AsNoTracking().Skip(pageNum * pageSize).Take(pageSize).ToListAsync();
+        return Ok(list);
     }
 }

@@ -10,12 +10,17 @@ public class UrlShortenerApiService {
         _httpClient = new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) });
     }
 
-    public async Task<ShortenedUrlModel?> ShortenUrlAsync(string url) {
+    public static async Task<List<ShortenedUrlModel>?> GetUrlListAsync(int pageNum, int pageSize) {
+        var response = await _httpClient.GetAsync($"Url/List?pageNum={pageNum}&pageSize={pageSize}");
+
+        return await response.Content.ReadFromJsonAsync<List<ShortenedUrlModel>>();
+    }
+
+    public static async Task<ShortenedUrlModel?> ShortenUrlAsync(string url) {
         var encodedUrl = Uri.EscapeDataString(url);
-        var response = await _httpClient.PostAsync($"Url/Shorten?url={encodedUrl}", null);
+        var response = await _httpClient.GetAsync($"Url/Shorten?url={encodedUrl}");
 
         if (!response.IsSuccessStatusCode) {
-            // Handle error (log it, throw exception, etc.)
             var errorContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Error shortening URL: {errorContent}");
             return null;
