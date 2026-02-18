@@ -44,4 +44,14 @@ public class UrlShortenerApiService {
             throw new Exception(errorContent);
         }
     }
+
+    public async Task UpdateShortUrlAsync(string oldCode, ShortenedUrlModel newModel) {
+        var client = _httpClientFactory.CreateClient("Api");
+        var response = await client.PutAsJsonAsync($"Url/{oldCode}", newModel);
+
+        if (!response.IsSuccessStatusCode) {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception(errorContent);
+        }
+    }
 }

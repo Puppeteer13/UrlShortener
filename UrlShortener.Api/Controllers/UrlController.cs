@@ -88,4 +88,27 @@ public class UrlController : ControllerBase {
         await _dbContext.ShortenedUrls.Where(x => x.ShortCode == code).ExecuteDeleteAsync();
         return NoContent();
     }
+
+    [HttpPut("{code}")]
+    public async Task<IActionResult> UpdateShortUrl(string code, ShortenedUrlModel model) {
+        if (string.IsNullOrWhiteSpace(model.FullUrl))
+            return BadRequest("URL is required.");
+
+        if (!Uri.TryCreate(model.FullUrl, UriKind.Absolute, out var uriResult) ||
+            (uriResult.Scheme != Uri.UriSchemeHttp && uriResult.Scheme != Uri.UriSchemeHttps)) {
+            return BadRequest("Invalid URL format. Only HTTP/HTTPS are allowed.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.ShortCode) || model.ShortCode.Length != _codeLength || !model.ShortCode.All(x => _availableSymbols.Contains(x))) {
+            return BadRequest("Invalid Short Code");
+        }
+
+        await _dbContext.ShortenedUrls
+            .Where(x => x.ShortCode == code)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.ShortCode, model.ShortCode)
+                .SetProperty(x => x.FullUrl, model.FullUrl));
+
+        return NoContent();
+    }
 }

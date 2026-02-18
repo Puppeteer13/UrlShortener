@@ -26,7 +26,10 @@
 	<PropertyColumn Property="@(x => x.RedirectCount)" Title="Clicks" />
     <PropertyColumn Property="@(x => x.CreatedAt)" Title="Created At" />
     <TemplateColumn Title="Actions">
-        <Microsoft.FluentUI.AspNetCore.Components.FluentButton OnClick="@(() => DeleteUrlAsync(context.ShortCode))" Color="Color.Error">
+        <Microsoft.FluentUI.AspNetCore.Components.FluentButton OnClick="@(() => EditShortUrl(context))">
+            Edit
+        </Microsoft.FluentUI.AspNetCore.Components.FluentButton>
+        <Microsoft.FluentUI.AspNetCore.Components.FluentButton OnClick="@(() => DeleteUrlAsync(context.ShortCode))">
             Delete
         </Microsoft.FluentUI.AspNetCore.Components.FluentButton>
     </TemplateColumn>

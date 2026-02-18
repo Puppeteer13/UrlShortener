@@ -1,4 +1,5 @@
 ﻿using Microsoft.FluentUI.AspNetCore.Components;
+using UrlShortener.Shared;
 using GridItemsProviderResult = Microsoft.AspNetCore.Components.QuickGrid.GridItemsProviderResult;
 using PaginationState = Microsoft.AspNetCore.Components.QuickGrid.PaginationState;
 
@@ -9,14 +10,16 @@ public partial class UrlShortenerPage {
 
     private readonly UrlShortenerApiService _apiService;
     private readonly IToastService _toastService;
+    private readonly IDialogService _dialogService;
 
     public Microsoft.AspNetCore.Components.QuickGrid.GridItemsProvider<ShortUrlTableModel> ItemsProvider { get; set; }
     public PaginationState Pagination { get; set; } = new PaginationState { ItemsPerPage = _pageSize };
     public string UrlInput { get; set; } = "";
 
-    public UrlShortenerPage(UrlShortenerApiService apiService, IToastService toastService) {
+    public UrlShortenerPage(UrlShortenerApiService apiService, IToastService toastService, IDialogService dialogService) {
         _apiService = apiService;
         _toastService = toastService;
+        _dialogService = dialogService;
         ItemsProvider = async req => {
             var page = req.StartIndex / _pageSize + 1;
             try {
@@ -31,6 +34,8 @@ public partial class UrlShortenerPage {
                 return GridItemsProviderResult.From(new List<ShortUrlTableModel>(), 0);
             }
         };
+        _dialogService = dialogService;
+
     }
 
     public async Task AddUrlAsync() {
@@ -46,6 +51,34 @@ public partial class UrlShortenerPage {
         }
         await Pagination.SetCurrentPageIndexAsync(0);
         UrlInput = "";
+    }
+
+    public async Task EditShortUrl(ShortUrlTableModel model) {
+        var apiModel = new ShortenedUrlModel {
+            ShortCode = model.ShortCode,
+            FullUrl = model.FullUrl,
+            RedirectCount = model.RedirectCount,
+            CreatedAt = new DateTimeOffset(model.CreatedAt).ToUnixTimeSeconds()
+        };
+
+        var dialogRef = await _dialogService.ShowDialogAsync<EditDialog>(apiModel, new DialogParameters { 
+            Title = "Edit Shortened Url", 
+            PrimaryAction = "Confirm", 
+            SecondaryAction = "Cancel"
+        });
+
+        var result = await dialogRef.Result;
+        if (result.Cancelled || result?.Data is null || result?.Data is not ShortenedUrlModel newModel) {
+            return;
+        }
+
+        try {
+            await _apiService.UpdateShortUrlAsync(model.ShortCode, newModel);
+        } catch (Exception ex) {
+            _toastService.ShowError(ex.Message);
+            return;
+        }
+        await Pagination.SetCurrentPageIndexAsync(0);
     }
 
     public async Task DeleteUrlAsync(string code) {
