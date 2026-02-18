@@ -82,4 +82,10 @@ public class UrlController : ControllerBase {
         };
         return Ok(result);
     }
+
+    [HttpDelete("{code}")]
+    public async Task<IActionResult> DeleteShortUrl(string code) {
+        await _dbContext.ShortenedUrls.Where(x => x.ShortCode == code).ExecuteDeleteAsync();
+        return NoContent();
+    }
 }

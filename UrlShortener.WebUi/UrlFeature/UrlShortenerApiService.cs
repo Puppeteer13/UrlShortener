@@ -14,6 +14,11 @@ public class UrlShortenerApiService {
         var client = _httpClientFactory.CreateClient("Api");
         var response = await client.GetAsync($"Url/List?pageNum={pageNum}&pageSize={pageSize}");
 
+        if (!response.IsSuccessStatusCode) {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception(errorContent);
+        }
+
         return await response.Content.ReadFromJsonAsync<ShortenedUrlResponsePage>();
     }
 
@@ -24,10 +29,19 @@ public class UrlShortenerApiService {
 
         if (!response.IsSuccessStatusCode) {
             var errorContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Error shortening URL: {errorContent}");
-            return null;
+            throw new Exception(errorContent);
         }
 
         return await response.Content.ReadFromJsonAsync<ShortenedUrlModel>();
+    }
+
+    public async Task DeleteShortUrlAsync(string code) {
+        var client = _httpClientFactory.CreateClient("Api");
+        var response = await client.DeleteAsync($"Url/{code}");
+
+        if (!response.IsSuccessStatusCode) {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception(errorContent);
+        }
     }
 }
